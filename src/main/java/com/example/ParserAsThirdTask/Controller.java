@@ -10,7 +10,7 @@ public class Controller {
 
     @GetMapping("/")
     public String index() throws IOException {
-        return "Something";
+        return "dfd";
     }
 
 }
