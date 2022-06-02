@@ -10,7 +10,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -32,13 +31,18 @@ public class Parser {
             if (difference > 10000) {
 
                 pullOfCards.remove(80);
-                pullOfCards.remove(1);
+                pullOfCards.remove(90);
                 pullOfCards.remove(100);
                 pullOfCards.remove(54);
                 pullOfCards.remove(102);
                 pullOfCards.remove(53);
                 findNewArticles();
                 System.out.println("Новых обьявлений: " + cardsToShow.size());
+                String newCards = "";
+                for (Card card : cardsToShow) {
+                    newCards += card.getName() + " - " + card.getLink();
+                }
+                send = new SendEmail("hack1818181@gmail.com", "Подборка новых обьявлений прямо Вам в руки!", newCards);
                 timeOfLastResearch = System.currentTimeMillis();
             }
         }
@@ -46,7 +50,7 @@ public class Parser {
     }
 
 
-    public static ArrayList<Card> getCardsToShow(){
+    public static ArrayList<Card> getCardsToShow() {
         return cardsToShow;
     }
 
@@ -66,24 +70,24 @@ public class Parser {
             WebElement paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(i - 1);
             doc = Jsoup.parse(webDriver.getPageSource());
             JavascriptExecutor js = (JavascriptExecutor) webDriver;
-            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+            js.executeScript("window.scrollTo(0, 50);");
             try {
                 Thread.sleep(500);
                 paginationButton.click();
                 Thread.sleep(1000);
-            } catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
 
-            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+            js.executeScript("window.scrollTo(0, 50);");
             Document newPage = Jsoup.parse(webDriver.getPageSource());
             Elements newArticles = newPage.getElementsByTag("article");
             pullOfCards.addAll(addArticlesToCards(newArticles));
         }
     }
 
-    private static ArrayList<Card> addArticlesToCards(Elements articles) {
+    public static ArrayList<Card> addArticlesToCards(Elements articles) {
         ArrayList<Card> cards = new ArrayList<>();
         for (Element art : articles) {
             String name = art.getElementsByAttributeValue("data-mark", "OfferTitle").get(0).child(0).text();
@@ -115,7 +119,6 @@ public class Parser {
     public static void findNewArticles() throws InterruptedException {
         Document doc = Jsoup.parse(webDriver.getPageSource());
         int numberOfPages = getNumberOfPages(doc);
-        System.out.println("Найдено " + numberOfPages + " страниц");
         System.out.println("Анализ страницы: 1");
         Elements newArticles = doc.getElementsByTag("article");
         ArrayList<Card> newCards = new ArrayList<>();
@@ -126,24 +129,23 @@ public class Parser {
         WebElement paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(0);
 
         JavascriptExecutor js = (JavascriptExecutor) webDriver;
-        js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-
         try {
-            Thread.sleep(1000);
+            js.executeScript("window.scrollTo(0, 50);");
+            Thread.sleep(500);
             paginationButton.click();
             Thread.sleep(1500);
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        for (int i = 1; i < numberOfPages-1; i++) {
-            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-            if(webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).size()==(i-1)){
+        for (int i = 1; i < numberOfPages - 1; i++) {
+            js.executeScript("window.scrollTo(0, 50);");
+            if (webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).size() == (i - 1)) {
                 break;
             }
             paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(i - 1);
-            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-            Thread.sleep(500);
+            js.executeScript("window.scrollTo(0, 50);");
+            Thread.sleep(1000);
             paginationButton.click();
             Thread.sleep(1000);
             Document newPage = Jsoup.parse(webDriver.getPageSource());
@@ -156,7 +158,7 @@ public class Parser {
                     pullOfCards.add(card);
                 }
             }
-            System.out.println("Анализ страницы: " + (i+1));
+            System.out.println("Анализ страницы: " + (i + 1));
         }
     }
 

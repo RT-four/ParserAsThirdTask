@@ -39,7 +39,7 @@ public class SendEmail {
             msg.setFrom(new InternetAddress(senderEmail));
             msg.addRecipient(Message.RecipientType.TO, new InternetAddress(receiverEmail));
             Transport.send(msg);
-            System.out.println("Приветственное сообщение отправлено");
+            System.out.println("Письмо отправлено");
         } catch (Exception e) {
             e.printStackTrace();
         }
