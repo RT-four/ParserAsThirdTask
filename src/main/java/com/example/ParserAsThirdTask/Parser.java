@@ -4,45 +4,53 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class Parser {
-    static Elements pull;
-    static long startTime;
+    static ArrayList<Card> pullOfCards = new ArrayList<>();
+    static long timeOfLastResearch;
     static WebDriver webDriver;
-    static Elements articlesToShow = new Elements();
+    static ArrayList<Card> cardsToShow = new ArrayList<>();
 
-    public static void start() throws IOException, InterruptedException {
+    public static void start() throws InterruptedException {
         System.setProperty("webdriver.chrome.driver", "selenium\\chromedriver.exe");
         webDriver = new ChromeDriver();
-        pull = firstParse();
-        startTime = System.currentTimeMillis();
-//        sendMail("Cong, we started!");
+        firstParse();
+        System.out.println("Количество обьявлений при старте программы: " + pullOfCards.size());
+        timeOfLastResearch = System.currentTimeMillis();
+        SendEmail send = new SendEmail("hack1818181@gmail.com", "Оповещения о новых обьявлениях", "Начинаем работу!");
         while (true) {
-            long differense = Math.subtractExact(System.currentTimeMillis(), startTime);
-            if (differense > 5000) {
-                pull.remove(2);
-//                pull.remove(pull.size()-2);
-//                pull.remove(pull.size()-3);
-//                pull.remove(pull.size()-4);
+            long difference = Math.subtractExact(System.currentTimeMillis(), timeOfLastResearch);
+            if (difference > 10000) {
+
+                pullOfCards.remove(80);
+                pullOfCards.remove(1);
+                pullOfCards.remove(100);
+                pullOfCards.remove(54);
+                pullOfCards.remove(102);
+                pullOfCards.remove(53);
                 findNewArticles();
-                System.out.println(articlesToShow);
+                System.out.println("Новых обьявлений: " + cardsToShow.size());
+                timeOfLastResearch = System.currentTimeMillis();
             }
         }
 
     }
 
-//    public static String getTimeSinceStart() {
-//        return "Time since our start: " + Math.subtractExact(System.currentTimeMillis(), startTime);
-//    }
 
+    public static ArrayList<Card> getCardsToShow(){
+        return cardsToShow;
+    }
 
-    public static Elements firstParse() throws InterruptedException {
+    public static void firstParse() throws InterruptedException {
         String url = "https://spb.cian.ru/cat.php?deal_type=sale&engine_version=2&offer_type=offices&office_type%5B0%5D=6&region=4588&sort=creation_date_desc";
         webDriver.get(url);
         webDriver.manage().window().maximize();
@@ -52,35 +60,47 @@ public class Parser {
         webDriver.get(url);
         Document doc = Jsoup.parse(webDriver.getPageSource());
         Elements articles = doc.getElementsByTag("article");
+        pullOfCards.addAll(addArticlesToCards(articles));
         int numberOfPages = getNumberOfPages(doc);
         for (int i = 1; i < numberOfPages; i++) {
             WebElement paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(i - 1);
             doc = Jsoup.parse(webDriver.getPageSource());
-            //Creating the JavascriptExecutor interface object by Type casting
-            JavascriptExecutor js = (JavascriptExecutor)webDriver;
+            JavascriptExecutor js = (JavascriptExecutor) webDriver;
             js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+            try {
+                Thread.sleep(500);
+                paginationButton.click();
+                Thread.sleep(1000);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
 
-//            if (doc.getElementsByAttributeValue("alt", "UX Feedback").size() > 0) {
-//                WebElement imgToClick = webDriver.findElement(By.className("uxs-1149hc6"));
-//                imgToClick.click();
-//                Thread.sleep(500);
-//                WebElement placeToClick = webDriver.findElement(By.className("close-icon"));
-//                placeToClick.click();
-//                Thread.sleep(500);
-//            }
-//            if (doc.getElementsByClass("uxs-3arm_zHETw").size() > 0) {
-//                WebElement imgToClick = webDriver.findElement(By.className("uxs-1oddrgm"));
-//                imgToClick.click();
-//                Thread.sleep(500);
-//            }
-            paginationButton.click();
+
             js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-            Thread.sleep(1000);
             Document newPage = Jsoup.parse(webDriver.getPageSource());
             Elements newArticles = newPage.getElementsByTag("article");
-            articles.addAll(newArticles);
+            pullOfCards.addAll(addArticlesToCards(newArticles));
         }
-        return articles;
+    }
+
+    private static ArrayList<Card> addArticlesToCards(Elements articles) {
+        ArrayList<Card> cards = new ArrayList<>();
+        for (Element art : articles) {
+            String name = art.getElementsByAttributeValue("data-mark", "OfferTitle").get(0).child(0).text();
+            String price = art.getElementsByAttributeValue("data-mark", "MainPrice").get(0).child(0).text();
+            String address = "Не указан";
+            if (art.getElementsByAttributeValue("data-name", "SpecialGeo").size() > 0) {
+                address = art.getElementsByAttributeValue("data-name", "SpecialGeo").get(0).child(0).child(1).text();
+            }
+            String linkToPicture = "http://s1.iconbird.com/ico/2013/9/450/w256h2561380453900FileDefault256x25632.png";
+            if (art.getElementsByClass("_32bbee5fda--container--o8CED").size() > 0) {
+                linkToPicture = art.getElementsByClass("_32bbee5fda--container--o8CED").get(0).attr("src");
+            }
+            String link = art.getElementsByAttributeValue("data-name", "LinkArea").get(0).child(0).attr("href");
+            Card newCard = new Card(name, price, address, link, linkToPicture);
+            cards.add(newCard);
+        }
+        return cards;
     }
 
     public static int getNumberOfPages(Document doc) {
@@ -93,50 +113,60 @@ public class Parser {
     }
 
     public static void findNewArticles() throws InterruptedException {
-        JavascriptExecutor js = (JavascriptExecutor)webDriver;
-        js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-        articlesToShow.clear();
-        WebElement paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(0);
         Document doc = Jsoup.parse(webDriver.getPageSource());
-//        if (doc.getElementsByAttributeValue("alt", "UX Feedback").size() > 0) {
-//            WebElement imgToClick = webDriver.findElement(By.className("uxs-1149hc6"));
-//            imgToClick.click();
-//            Thread.sleep(500);
-//            doc = Jsoup.parse(webDriver.getPageSource());
-//            WebElement placeToClick = webDriver.findElement(By.className("close-icon"));
-//            placeToClick.click();
-//            Thread.sleep(500);
-//        }
-//        if (doc.getElementsByClass("uxs-3arm_zHETw").size() > 0) {
-//            Thread.sleep(1000);
-//            doc = Jsoup.parse(webDriver.getPageSource());
-//            WebElement imgToClick = webDriver.findElement(By.className("close-icon"));
-//            imgToClick.click();
-//            Thread.sleep(1000);
-//        }
-        js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-        paginationButton.click();
-        Thread.sleep(1000);
-        doc = Jsoup.parse(webDriver.getPageSource());
         int numberOfPages = getNumberOfPages(doc);
+        System.out.println("Найдено " + numberOfPages + " страниц");
+        System.out.println("Анализ страницы: 1");
+        Elements newArticles = doc.getElementsByTag("article");
+        ArrayList<Card> newCards = new ArrayList<>();
+        newCards.addAll(addArticlesToCards(newArticles));
+
+        cardsToShow.clear();
+
+        WebElement paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(0);
+
+        JavascriptExecutor js = (JavascriptExecutor) webDriver;
+        js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+
+        try {
+            Thread.sleep(1000);
+            paginationButton.click();
+            Thread.sleep(1500);
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
         for (int i = 1; i < numberOfPages-1; i++) {
             js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-            paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(i-1);
+            if(webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).size()==(i-1)){
+                break;
+            }
+            paginationButton = webDriver.findElements(By.className("_32bbee5fda--list-itemLink--BU9w6")).get(i - 1);
             js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+            Thread.sleep(500);
             paginationButton.click();
             Thread.sleep(1000);
             Document newPage = Jsoup.parse(webDriver.getPageSource());
-            Elements newArticles = newPage.getElementsByTag("article");
-            if (pull.containsAll(newArticles)) {
-                break;
-            }
-            for (Element article : newArticles) {
-                if (!pull.contains(article)) {
-                    articlesToShow.add(article);
-                    pull.add(article);
+            newArticles = newPage.getElementsByTag("article");
+            newCards.addAll(addArticlesToCards(newArticles));
+
+            for (Card card : newCards) {
+                if (!haveCard(pullOfCards, card)) {
+                    cardsToShow.add(card);
+                    pullOfCards.add(card);
                 }
             }
+            System.out.println("Анализ страницы: " + (i+1));
         }
+    }
+
+    public static boolean haveCard(ArrayList<Card> pull, Card card) {
+        for (Card cardOfPull : pull) {
+            if (card.getLink().equals(cardOfPull.getLink())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

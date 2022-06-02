@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Парсер</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Ubuntu" rel="stylesheet">
+
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/application.css">
+
+    <!-- Font Awesome -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.7/js/all.js"></script>
+
+    <!-- Bootstrap Scripts -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<section class="white-section" id="pricing">
+
+    <h2 class="section-heading">Парсер сайта Циан</h2>
+    <p>Отображения новых обьявлений и уведомление о них на почту</p>
+
+    <div class="row">
+
+        {{#cards}}
+            <div class="pricing-column col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>{{name}}</h3>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="price-text"><img src="{{linkToPicture}}" class="photo"></h2>
+                        <p>{{price}}</p>
+                        <p>{{address}}</p>
+                        <button class="btn btn-lg btn-block btn-outline-dark" type="button"><a href="{{link}}">Перейти к
+                            обьявлению</a></button>
+                    </div>
+                </div>
+            </div>
+        {{/cards}}
+    </div>
+
+</section>
+
+<!-- Footer -->
+
+<footer class="white-section" id="footer">
+    <div class="container-fluid">
+        <p> Васильев Филипп 3530901/10002</p>
+    </div>
+</footer>
+
+
+</body>
+
+</html>

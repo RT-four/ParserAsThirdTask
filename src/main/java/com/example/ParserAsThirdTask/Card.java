@@ -4,13 +4,23 @@ public class Card {
     private String name;
     private String price;
     private String address;
-    private String description;
+    private String link;
+    private String linkToPicture;
 
-    public Card(String name, String price, String address, String description) {
+    public Card(String name, String price, String address, String link, String linkToPicture) {
         this.name = name;
         this.price = price;
         this.address = address;
-        this.description = description;
+        this.link = link;
+        this.linkToPicture = linkToPicture;
+    }
+
+    public String getLinkToPicture() {
+        return linkToPicture;
+    }
+
+    public void setLinkToPicture(String linkToPicture) {
+        this.linkToPicture = linkToPicture;
     }
 
     public String getName() {
@@ -37,12 +47,12 @@ public class Card {
         this.address = address;
     }
 
-    public String getDescription() {
-        return description;
+    public String getLink() {
+        return link;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setLink(String link) {
+        this.link = link;
     }
 
 }
