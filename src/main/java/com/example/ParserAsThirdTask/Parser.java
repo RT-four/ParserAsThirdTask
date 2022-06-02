@@ -40,7 +40,7 @@ public class Parser {
                 System.out.println("Новых обьявлений: " + cardsToShow.size());
                 String newCards = "";
                 for (Card card : cardsToShow) {
-                    newCards += card.getName() + " - " + card.getLink();
+                    newCards += "Название обьекта: " + card.getName() + " Ссылка: " + card.getLink() +"    ";
                 }
                 send = new SendEmail("hack1818181@gmail.com", "Подборка новых обьявлений прямо Вам в руки!", newCards);
                 timeOfLastResearch = System.currentTimeMillis();
